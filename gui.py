@@ -1,11 +1,11 @@
 import sys
 from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QWidget, QGridLayout, QPushButton, QLabel,
-    QDialog, QVBoxLayout, QSpinBox, QDialogButtonBox, QMenuBar, QAction,
-    QMessageBox, QTextBrowser, QHBoxLayout
+    QDialog, QVBoxLayout, QSpinBox, QDialogButtonBox, QAction,
+    QMessageBox, QTextBrowser
 )
-from PyQt5.QtGui import QFont, QColor, QPalette
-from PyQt5.QtCore import Qt, QSize
+from PyQt5.QtGui import QFont, QPalette
+from PyQt5.QtCore import Qt
 
 try:
     from game_logic import Game
@@ -141,7 +141,6 @@ class MainWindow(QMainWindow):
 
     def _create_grid_widgets(self):
         """Создает виджеты для ячеек и кнопок управления."""
-        # Очищаем предыдущие виджеты
         for i in reversed(range(self.game_area_layout.count())):
             widget = self.game_area_layout.itemAt(i).widget()
             if widget is not None:
@@ -155,7 +154,6 @@ class MainWindow(QMainWindow):
         cell_dimension = 60
         button_thickness = int(cell_dimension * 0.5)
 
-        # Создаем кнопки сдвига столбцов
         for c in range(size):
             btn_up = QPushButton("▲")
             btn_up.setFixedSize(cell_dimension, button_thickness)
@@ -169,7 +167,6 @@ class MainWindow(QMainWindow):
             self.game_area_layout.addWidget(btn_down, size + 1, c + 1, alignment=Qt.AlignCenter)
             self.shift_buttons[('col', c, 1)] = btn_down
 
-        # Создаем ячейки и кнопки сдвига строк
         for r in range(size):
             btn_left = QPushButton("◀")
             btn_left.setFixedSize(button_thickness, cell_dimension)
@@ -177,7 +174,6 @@ class MainWindow(QMainWindow):
             self.game_area_layout.addWidget(btn_left, r + 1, 0, alignment=Qt.AlignCenter)
             self.shift_buttons[('row', r, -1)] = btn_left
 
-            # Ячейки
             for c in range(size):
                 cell = QLabel("")
                 cell.setFixedSize(cell_dimension, cell_dimension)
@@ -200,12 +196,10 @@ class MainWindow(QMainWindow):
         board_data = self.game.board
         size = self.game.size
 
-        # Проверка и пересоздание виджетов при необходимости
         needs_recreate = False
         if not self.cell_widgets or len(self.cell_widgets) != size:
             needs_recreate = True
         else:
-            # Проверяем внутренние списки на случай, если они пустые или неправильного размера
             for row_widgets in self.cell_widgets:
                  if not row_widgets or len(row_widgets) != size:
                       needs_recreate = True
@@ -217,23 +211,20 @@ class MainWindow(QMainWindow):
             QApplication.processEvents()
             self.adjustSize()
 
-        # Обновляем цвета ячеек
         for r in range(size):
             for c in range(size):
                 value = board_data[r][c]
                 color = Game.get_color_for_value(value, self.colors)
-                # Проверка на существование cell_widgets[r][c] перед доступом
                 if r < len(self.cell_widgets) and c < len(self.cell_widgets[r]) and self.cell_widgets[r][c]:
                     cell = self.cell_widgets[r][c]
                     palette = cell.palette()
                     palette.setColor(QPalette.Window, color)
                     cell.setPalette(palette)
-                    # cell.setText(str(value)) # Показ цифры цвета (опционально)
 
 
     def _handle_shift(self, axis, index, direction):
         """Обработчик нажатия кнопок сдвига."""
-        if self.game.is_solved(): # Если игра уже решена, не даем сдвигать
+        if self.game.is_solved():
              return
 
         if axis == 'row':
@@ -242,7 +233,7 @@ class MainWindow(QMainWindow):
             self.game.shift_col(index, direction)
 
         self._update_grid_display()
-        self._check_win_condition() # Проверяем после каждого хода
+        self._check_win_condition()
 
     def _check_win_condition(self):
         """Проверяет условие победы и выводит сообщение."""
@@ -250,15 +241,14 @@ class MainWindow(QMainWindow):
             self.status_label.setText("Поздравляем! Поле собрано!")
             QMessageBox.information(self, "Победа!", "Вы собрали поле!")
         else:
-            # Обновляем статус только если не показываем сообщение о победе
              if not self.status_label.text().startswith("Поздравляем"):
                  self.status_label.setText("В процессе...")
 
 
     def start_new_game(self):
         """Начинает новую игру с текущим размером (поле будет перемешано)."""
-        current_size = self.game.size # Сохраняем текущий размер
-        self.game = Game(size=current_size) # Создаем новую игру (сразу перемешивается)
+        current_size = self.game.size
+        self.game = Game(size=current_size)
         self._update_grid_display()
         self.status_label.setText("Новая игра. Поле перемешано.")
         self.adjustSize()
@@ -266,17 +256,15 @@ class MainWindow(QMainWindow):
     def scramble_game(self):
         """Перемешивает текущее поле заново."""
         if self.game.is_solved():
-             # Если было решено, просто перемешиваем
              self.game.scramble()
         else:
-             # Если не решено, спрашиваем
              reply = QMessageBox.question(self, "Перемешать заново?",
                                           "Хотите перемешать поле еще раз?",
                                           QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
              if reply == QMessageBox.Yes:
-                 self.game.scramble() # Перемешиваем текущее состояние
+                 self.game.scramble()
              else:
-                  return # Ничего не делаем
+                  return
 
         self._update_grid_display()
         self.status_label.setText("Поле перемешано заново.")

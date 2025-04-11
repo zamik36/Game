@@ -34,8 +34,6 @@ class Game:
     def board(self):
         """
         Возвращает копию текущего состояния игрового поля.
-        Использование @property позволяет получить доступ как к атрибуту,
-        но при этом возвращает копию для защиты внутреннего состояния.
         """
         return [row[:] for row in self._board]
 
@@ -46,10 +44,6 @@ class Game:
     def scramble(self, moves=None):
         """
         Перемешивает игровое поле, выполняя случайные сдвиги.
-
-        Args:
-            moves (int, optional): Количество случайных сдвигов.
-                                   Если None, используется size * 5.
         """
         if moves is None:
             moves = self._size * 5
@@ -70,10 +64,6 @@ class Game:
     def shift_row(self, row_index, direction):
         """
         Циклически сдвигает указанную строку влево (direction=-1) или вправо (direction=1).
-
-        Args:
-            row_index (int): Индекс строки для сдвига (0 <= row_index < size).
-            direction (int): Направление сдвига (-1 или 1).
         """
         if not (0 <= row_index < self._size):
             raise IndexError("Неверный индекс строки")
@@ -87,10 +77,6 @@ class Game:
     def shift_col(self, col_index, direction):
         """
         Циклически сдвигает указанный столбец вверх (direction=-1) или вниз (direction=1).
-
-        Args:
-            col_index (int): Индекс столбца для сдвига (0 <= col_index < size).
-            direction (int): Направление сдвига (-1 или 1).
         """
         if not (0 <= col_index < self._size):
             raise IndexError("Неверный индекс столбца")
@@ -103,11 +89,11 @@ class Game:
             self._board[r][col_index] = col_deque[r]
 
     def is_solved(self):
-        """Проверяет, решено ли игровое поле (совпадает ли с начальным)."""
+        """Проверяет, решено ли игровое поле."""
         return self._board == self._initial_board
 
     def reset(self):
-        """Сбрасывает поле к начальному (решенному) состоянию."""
+        """Сбрасывает поле к начальному состоянию."""
         self._board = [row[:] for row in self._initial_board]
 
     @staticmethod
